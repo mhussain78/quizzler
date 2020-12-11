@@ -1,7 +1,7 @@
 class Question {
-  String content = '';
+  String text = '';
 
   bool answer = false;
 
-  Question(this.content, this.answer);
+  Question(this.text, this.answer);
 }
