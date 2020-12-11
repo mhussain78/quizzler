@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:quizzler/Question.dart';
+import 'package:quizzler/quiz_brain.dart';
 
 void main() => runApp(Quizzler());
 
@@ -30,23 +30,19 @@ class _QuizPageState extends State<QuizPage> {
 
   var questionNumber = 0;
 
-  List<Question> questions = [
-    Question('You can lead a cow down stairs but not up stairs.', false),
-    Question('Approximately one quarter of human bones are in the feet.', true),
-    Question('A slug\'s blood is green.', true)
-  ];
+  var quizBrain = QuizBrain();
 
   @override
   Widget build(BuildContext context) {
     List<Widget> children = [];
-    if (questionNumber < questions.length) {
+    if (questionNumber < quizBrain.questions.length) {
       children.add(Expanded(
         flex: 5,
         child: Padding(
           padding: EdgeInsets.all(10.0),
           child: Center(
             child: Text(
-              questions[questionNumber].text,
+              quizBrain.questions[questionNumber].text,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 25.0,
@@ -122,7 +118,7 @@ class _QuizPageState extends State<QuizPage> {
   }
 
   void addIcon(bool answer) {
-    var question = questions[scoreKeeper.length];
+    var question = quizBrain.questions[scoreKeeper.length];
     var icon = question.answer == answer
         ? Icon(Icons.check, color: Colors.green)
         : Icon(Icons.close, color: Colors.red);
