@@ -28,21 +28,20 @@ class QuizPage extends StatefulWidget {
 class _QuizPageState extends State<QuizPage> {
   List<Icon> scoreKeeper = [];
 
-  var questionNumber = 0;
-
   var quizBrain = QuizBrain();
 
   @override
   Widget build(BuildContext context) {
     List<Widget> children = [];
-    if (questionNumber < quizBrain.questions.length) {
+
+    if (quizBrain.hasNextQuestion()) {
       children.add(Expanded(
         flex: 5,
         child: Padding(
           padding: EdgeInsets.all(10.0),
           child: Center(
             child: Text(
-              quizBrain.questions[questionNumber].text,
+              quizBrain.getCurrentQuestionText(),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 25.0,
@@ -89,14 +88,16 @@ class _QuizPageState extends State<QuizPage> {
           ),
         ),
       ));
+      children.add(Row(children: scoreKeeper));
     } else {
+      var wonOrLost = hasWon() ? 'won :-)' : 'lost :-(';
       children.add(Expanded(
-        flex: 5,
+        flex: 7,
         child: Padding(
           padding: EdgeInsets.all(10.0),
           child: Center(
             child: Text(
-              'Game is over',
+              'Game is over and you have $wonOrLost',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 25.0,
@@ -106,10 +107,29 @@ class _QuizPageState extends State<QuizPage> {
           ),
         ),
       ));
+      children.add(Expanded(
+        child: Padding(
+          padding: EdgeInsets.all(15.0),
+          child: FlatButton(
+            textColor: Colors.white,
+            color: Colors.lightBlue,
+            child: Text(
+              'Reset',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20.0,
+              ),
+            ),
+            onPressed: () {
+              setState(() {
+                quizBrain.reset();
+                scoreKeeper.clear();
+              });
+            },
+          ),
+        ),
+      ));
     }
-
-    children.add(Row(children: scoreKeeper));
-
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -118,19 +138,23 @@ class _QuizPageState extends State<QuizPage> {
   }
 
   void addIcon(bool answer) {
-    var question = quizBrain.questions[scoreKeeper.length];
-    var icon = question.answer == answer
+    var icon = quizBrain.getQuestionAnswerByIndex(scoreKeeper.length) == answer
         ? Icon(Icons.check, color: Colors.green)
         : Icon(Icons.close, color: Colors.red);
     setState(() {
       scoreKeeper.add(icon);
     });
-    questionNumber++;
+    quizBrain.incrementQuestionsNumber();
+  }
+
+  bool hasWon() {
+    int rightAnswers = 0;
+    for (var i = 0; i < scoreKeeper.length; i++) {
+      if (scoreKeeper[i].icon == Icons.check) {
+        rightAnswers++;
+      }
+    }
+
+    return rightAnswers > (scoreKeeper.length / 2.0);
   }
 }
-
-/*
-question1: 'You can lead a cow down stairs but not up stairs.', false,
-question2: 'Approximately one quarter of human bones are in the feet.', true,
-question3: 'A slug\'s blood is green.', true,
-*/
