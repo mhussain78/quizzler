@@ -114,7 +114,7 @@ class _QuizPageState extends State<QuizPage> {
       var wonOrLost = hasWon() ? 'won :-)' : 'lost :-(';
       Alert(
         context: context,
-        type: AlertType.info,
+        type: hasWon() ? AlertType.success : AlertType.error,
         title: 'Game over.',
         desc: 'You have $wonOrLost',
         buttons: [
@@ -123,14 +123,13 @@ class _QuizPageState extends State<QuizPage> {
               "Reset",
               style: TextStyle(color: Colors.white, fontSize: 20),
             ),
-            onPressed: () => setState(() {
-              Navigator.pop(context);
-              restart();
-            }),
+            onPressed: () => Navigator.pop(context),
             width: 120,
           )
         ],
-      ).show();
+      ).show().whenComplete(() => setState(() {
+            restart();
+          }));
     }
   }
 
