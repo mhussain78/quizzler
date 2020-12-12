@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quizzler/quiz_brain.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 void main() => runApp(Quizzler());
 
@@ -33,108 +34,72 @@ class _QuizPageState extends State<QuizPage> {
   @override
   Widget build(BuildContext context) {
     List<Widget> children = [];
-
     if (quizBrain.hasNextQuestion()) {
-      children.add(Expanded(
-        flex: 5,
-        child: Padding(
-          padding: EdgeInsets.all(10.0),
-          child: Center(
-            child: Text(
-              quizBrain.getCurrentQuestionText(),
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 25.0,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ),
-      ));
-      children.add(Expanded(
-        child: Padding(
-          padding: EdgeInsets.all(15.0),
-          child: FlatButton(
-            textColor: Colors.white,
-            color: Colors.green,
-            child: Text(
-              'True',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20.0,
-              ),
-            ),
-            onPressed: () {
-              addIcon(true);
-            },
-          ),
-        ),
-      ));
-      children.add(Expanded(
-        child: Padding(
-          padding: EdgeInsets.all(15.0),
-          child: FlatButton(
-            color: Colors.red,
-            child: Text(
-              'False',
-              style: TextStyle(
-                fontSize: 20.0,
-                color: Colors.white,
-              ),
-            ),
-            onPressed: () {
-              addIcon(false);
-            },
-          ),
-        ),
-      ));
-      children.add(Row(children: scoreKeeper));
-    } else {
-      var wonOrLost = hasWon() ? 'won :-)' : 'lost :-(';
-      children.add(Expanded(
-        flex: 7,
-        child: Padding(
-          padding: EdgeInsets.all(10.0),
-          child: Center(
-            child: Text(
-              'Game is over and you have $wonOrLost',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 25.0,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ),
-      ));
-      children.add(Expanded(
-        child: Padding(
-          padding: EdgeInsets.all(15.0),
-          child: FlatButton(
-            textColor: Colors.white,
-            color: Colors.lightBlue,
-            child: Text(
-              'Reset',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20.0,
-              ),
-            ),
-            onPressed: () {
-              setState(() {
-                quizBrain.reset();
-                scoreKeeper.clear();
-              });
-            },
-          ),
-        ),
-      ));
+      buildPlayWidgets(children);
     }
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: children,
     );
+  }
+
+  void buildPlayWidgets(List<Widget> children) {
+    children.add(Expanded(
+      flex: 5,
+      child: Padding(
+        padding: EdgeInsets.all(10.0),
+        child: Center(
+          child: Text(
+            quizBrain.getCurrentQuestionText(),
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 25.0,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ),
+    ));
+    children.add(Expanded(
+      child: Padding(
+        padding: EdgeInsets.all(15.0),
+        child: FlatButton(
+          textColor: Colors.white,
+          color: Colors.green,
+          child: Text(
+            'True',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20.0,
+            ),
+          ),
+          onPressed: () {
+            addIcon(true);
+          },
+        ),
+      ),
+    ));
+    children.add(Expanded(
+      child: Padding(
+        padding: EdgeInsets.all(15.0),
+        child: FlatButton(
+          color: Colors.red,
+          child: Text(
+            'False',
+            style: TextStyle(
+              fontSize: 20.0,
+              color: Colors.white,
+            ),
+          ),
+          onPressed: () {
+            addIcon(false);
+          },
+        ),
+      ),
+    ));
+    children.add(Row(children: scoreKeeper));
   }
 
   void addIcon(bool answer) {
@@ -145,6 +110,33 @@ class _QuizPageState extends State<QuizPage> {
       scoreKeeper.add(icon);
     });
     quizBrain.incrementQuestionsNumber();
+    if (!quizBrain.hasNextQuestion()) {
+      var wonOrLost = hasWon() ? 'won :-)' : 'lost :-(';
+      Alert(
+        context: context,
+        type: AlertType.info,
+        title: 'Game over.',
+        desc: 'You have $wonOrLost',
+        buttons: [
+          DialogButton(
+            child: Text(
+              "Reset",
+              style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
+            onPressed: () => setState(() {
+              Navigator.pop(context);
+              restart();
+            }),
+            width: 120,
+          )
+        ],
+      ).show();
+    }
+  }
+
+  void restart() {
+    quizBrain.reset();
+    scoreKeeper.clear();
   }
 
   bool hasWon() {
